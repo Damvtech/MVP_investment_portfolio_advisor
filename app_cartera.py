@@ -4,6 +4,22 @@ import numpy as np
 import yfinance as yf
 from datetime import datetime, timedelta
 from scipy.optimize import minimize
+import matplotlib.pyplot as plt
+from dotenv import load_dotenv
+import os
+import openai
+from openai import OpenAI
+
+#load_dotenv()
+openai.api_key = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
+
+#import cmdstanpy
+#cmdstanpy.install_cmdstan()
+
+
+# Definir las fechas globalmente
+end_date = datetime.now()
+start_date = end_date - timedelta(days=5*365)
 
 # Descargar datos
 @st.cache_data
@@ -32,15 +48,13 @@ def cargar_datos():
     "Booking Holdings": "BKNG", "American Express": "AXP", "Mastercard": "MA", "PayPal": "PYPL"
         # Puedes agregar más compañías aquí para tu MVP
     }
-    end_date = datetime.now()
-    start_date = end_date - timedelta(days=5*365)
     data = pd.DataFrame()
     for company, symbol in symbols.items():
         df = yf.download(symbol, start=start_date, end=end_date)['Close']
         if not df.empty:
             data[company] = df
-        #else:
-        #    print(f"No se pudieron descargar los datos para {company} ({symbol}).")
+        else:
+            print(f"No se pudieron descargar los datos para {company} ({symbol}).")
     return data.dropna()
 
 data = cargar_datos()
@@ -53,6 +67,7 @@ cov_matrix = daily_returns.cov()
 # Preguntas
 st.title("📊 Recomendador de Cartera de Inversión")
 st.write("Responde estas preguntas para determinar la cartera más adecuada a tu apetito de riesgo actual:")
+st.write("**Esta simulación se basa en datos históricos y no garantiza rentabilidades futuras. Invierte con responsabilidad.*") # Disclaimer
 
 # Widget con clave única
 q1 = st.radio("Nivel de seguridad deseado:",
@@ -133,16 +148,145 @@ if st.button("Generar cartera óptima"):
         # Cartera óptima
         pesos_optimos = optimizar(objetivos[perfil])
 
-        # Mostrar resultados
-        cartera = {data.columns[i]: round(pesos_optimos[i]*100,2) for i in range(len(data.columns)) if pesos_optimos[i] > 0.001}
+        # Mostrar resultados ordenados
+        cartera = {data.columns[i]: round(pesos_optimos[i]*100, 2) for i in range(len(data.columns)) if pesos_optimos[i] > 0.001}
 
-        st.subheader("🎯 Composición óptima de tu cartera")
-        for empresa, peso in cartera.items():
+        # Ordenar la cartera por porcentaje de mayor a menor
+        cartera_ordenada = dict(sorted(cartera.items(), key=lambda item: item[1], reverse=True))
+
+        st.subheader("🎯 Composición óptima de tu cartera (ordenada de mayor a menor)")
+        for empresa, peso in cartera_ordenada.items():
             st.write(f"- **{empresa}:** {peso}%")
 
-        rent_anual = annualized_return(pesos_optimos)
-        vol_anual = annualized_volatility(pesos_optimos)
+        # Convertir divisa a EUR si es necesario
 
-        st.write(f"🔸 **Rentabilidad anualizada esperada:** {rent_anual:.2%}")
-        st.write(f"🔸 **Volatilidad anualizada esperada:** {vol_anual:.2%}")
+        # Mapeo de divisas por activo (según Yahoo Finance)
+        divisas = {
+            "AAPL": "USD", "MSFT": "USD", "AMZN": "USD", "GOOGL": "USD", "TSLA": "USD",
+            "BRK-B": "USD", "JNJ": "USD", "XOM": "USD", "JPM": "USD", "V": "USD",
+            "NESN.SW": "CHF", "ROG.SW": "CHF", "005930.KS": "KRW", "7203.T": "JPY", "6758.T": "JPY",
+            "BABA": "HKD", "0700.HK": "HKD", "HSBA.L": "GBP", "BP.L": "GBP", "SHEL.L": "GBP",
+            "ULVR.L": "GBP", "MC.PA": "EUR", "TTE.PA": "EUR", "SIE.DE": "EUR", "VOW3.DE": "EUR",
+            "SAP.DE": "EUR", "SAN.MC": "EUR", "BBVA.MC": "EUR", "PBR": "BRL", "VALE": "BRL",
+            "IBN": "INR", "RELIANCE.BO": "INR", "INFY": "INR", "2318.HK": "HKD",
+            "0941.HK": "HKD", "RIO.L": "GBP", "BHP.AX": "AUD", "CBA.AX": "AUD",
+            "CSL.AX": "AUD", "NOVO-B.CO": "DKK", "AZN.L": "GBP", "ADS.DE": "EUR",
+            "HEIA.AS": "EUR", "PHIA.AS": "EUR", "ENEL.MI": "EUR", "RACE": "EUR", "2222.SR": "SAR",
+            "TME": "USD", "META": "USD", "PG": "USD", "KO": "USD",
+            "PEP": "USD", "MCD": "USD", "WMT": "USD", "COST": "USD", "INTC": "USD",
+            "AMD": "USD", "NVDA": "USD", "QCOM": "USD", "AVGO": "USD", "TXN": "USD",
+            "IBM": "USD", "ORCL": "USD", "CRM": "USD", "ADBE": "USD", "NFLX": "USD",
+            "T": "USD", "VZ": "USD", "TMUS": "USD", "PFE": "USD", "MRNA": "USD",
+            "MRK": "USD", "BMY": "USD", "AMGN": "USD", "GILD": "USD", "LLY": "USD",
+            "CVX": "USD", "COP": "USD", "SLB": "USD", "HAL": "USD", "MRO": "USD",
+            "LMT": "USD", "NOC": "USD", "RTX": "USD", "BA": "USD",
+            "GE": "USD", "HON": "USD", "MMM": "USD", "CAT": "USD", "DE": "USD",
+            "SBUX": "USD", "NKE": "USD", "LULU": "USD", "EL": "USD", "DPZ": "USD",
+            "BKNG": "USD", "AXP": "USD", "MA": "USD", "PYPL": "USD"
+        }
+
+        # Descargar tipos de cambio necesarios
+        st.write("🔄 **Descargando tipos de cambio para convertir a EUR...**")
+        tipos_cambio = {}
+        for divisa in set(divisas.values()):
+            if divisa != "EUR":  # No necesitamos convertir EUR a EUR
+                ticker = f"EUR{divisa}=X" if divisa != "USD" else "EURUSD=X"
+                tipos_cambio[divisa] = yf.download(ticker, start=start_date, end=end_date)['Close'].fillna(method='ffill')
+
+        # Convertir cada activo a EUR según su divisa
+        st.write("💱 **Convirtiendo valores de los activos a EUR...**")
+        data_eur = data.copy()
+        for column in data.columns:
+            divisa = divisas.get(column, "USD")  # Asumir USD por defecto si no se especifica
+            if divisa != "EUR":  # Solo convertir si no está ya en EUR
+                ticker = f"EUR{divisa}=X" if divisa != "USD" else "EURUSD=X"
+                # Alinear los índices de los datos y los tipos de cambio
+                tipo_cambio_alineado = tipos_cambio[divisa].reindex(data.index).fillna(method='ffill')
+                # Convertir el precio del activo a EUR
+                data_eur[column] = data[column] / tipo_cambio_alineado[ticker]
+
+        # Continuar con el cálculo de la cartera
+        st.write("📊 **Calculando el valor diario de la cartera propuesta...**")
+
+        # Escalamos la cartera como si hubieras invertido 1.000 €
+        inversion_inicial = 1000
+        cartera_retornos = (data_eur * pesos_optimos).sum(axis=1)
+        cartera_valores = cartera_retornos / cartera_retornos.iloc[0] * inversion_inicial
+
+        # Graficar la cartera durante los últimos 5 años
+        st.subheader("📈 **Evolución de la cartera propuesta en los últimos 5 años:**")
+        plt.figure(figsize=(10, 6))
+        plt.plot(cartera_valores, label="Cartera propuesta")
+        plt.title("Evolución de la cartera propuesta (últimos 5 años)")
+        plt.xlabel("Fecha")
+        plt.ylabel("Valor de la cartera (EUR)")
+        plt.legend()
+        st.pyplot(plt)
+
+        # Calcular estadísticas de la cartera
+        rolling_max = cartera_valores.cummax()
+        drawdowns = (cartera_valores - rolling_max) / rolling_max
+
+        if not drawdowns.isnull().all():
+            max_drawdown = drawdowns.min()
+            drawdown_start = drawdowns.idxmin()
+
+            try:
+                recovery_series = cartera_valores.loc[cartera_valores.index >= drawdown_start]
+                drawdown_end = recovery_series[recovery_series >= recovery_series.iloc[0]].index[0]
+            except IndexError:
+                drawdown_end = cartera_valores.index[-1]
+        else:
+            max_drawdown = 0.0
+            drawdown_start = cartera_valores.index[0]
+            drawdown_end = cartera_valores.index[-1]
+
+        valor_final = cartera_valores.iloc[-1]
+        ganancia_pct = (valor_final - inversion_inicial) / inversion_inicial * 100
+    
+        # Crear función para enviar promp a ChatGPT
+        def generar_mensaje_inversion(perfil, valor_final, ganancia_pct, drawdown_pct, drawdown_inicio, drawdown_fin):
+            prompt = f"""
+        Eres un asesor financiero que explica de forma clara y cercana los resultados de una inversión simulada.
+
+        Perfil del inversor: {perfil}.
+        Inversión inicial: 1.000€.
+        Valor actual después de 5 años: {valor_final:.2f}€.
+        Rentabilidad acumulada: {ganancia_pct:.2f}%.
+
+        El peor momento de esta cartera fue entre {drawdown_inicio} y {drawdown_fin}, con una caída del {drawdown_pct:.2f}% desde su máximo anterior.
+
+        Redacta una frase breve y empática que combine estos datos y le recuerde al usuario que mantener la calma es clave, adaptándola a su perfil de riesgo.
+        """
+            client = OpenAI(
+                api_key=st.secrets.get("OPENAI_API_KEY", os.environ.get("OPENAI_API_KEY"))
+            )
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.8,
+                max_tokens=150
+            )
+
+            mensaje = response.choices[0].message.content.strip()
+
+            return mensaje
+
+        with st.spinner("Generando análisis personalizado con IA..."):
+            try:
+                mensaje = generar_mensaje_inversion(
+                    perfil=perfil,  # ej. "Riesgo medio"
+                    valor_final=valor_final,  # float, ej. 2217.71
+                    ganancia_pct=ganancia_pct,  # float, ej. 121.77
+                    drawdown_pct=max_drawdown * 100,  # float
+                    drawdown_inicio=drawdown_start.strftime('%B %Y'),  # ej. "diciembre 2023"
+                    drawdown_fin=drawdown_end.strftime('%B %Y')  # ej. "abril 2025"
+                )
+                st.markdown("### 🧠 Reflexión sobre tu inversión 👇🏼")
+                st.success(mensaje)
+            except Exception as e:
+                st.error(f"Ocurrió un error al generar el mensaje: {e}")
+
 
