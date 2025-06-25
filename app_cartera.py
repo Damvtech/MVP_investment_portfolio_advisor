@@ -23,7 +23,19 @@ start_date = end_date - timedelta(days=5*365)
 
 # Añadir imagen
 image_url = "https://www.inabaweb.com/wp-content/uploads/2023/06/eToro.png"
-st.image(image_url, caption="Imagen de la URL", use_container_width=True)
+st.markdown(
+    f"""
+    <style>
+    .stApp {{
+        background-image: url("{image_url}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 # Descargar datos
 @st.cache_data
