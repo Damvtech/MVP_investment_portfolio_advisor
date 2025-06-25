@@ -22,15 +22,19 @@ end_date = datetime.now()
 start_date = end_date - timedelta(days=5*365)
 
 # Añadir imagen
-image_url = "https://www.inabaweb.com/wp-content/uploads/2023/06/eToro.png"
 st.markdown(
-    f"""
+    """
     <style>
     .stApp {{
-        background-image: url("{image_url}");
+        background-image: url("https://www.inabaweb.com/wp-content/uploads/2023/06/eToro.png");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
+    }}
+    .main {{
+        background-color: rgba(255, 255, 255, 0.85);
+        padding: 2rem;
+        border-radius: 10px;
     }}
     </style>
     """,
