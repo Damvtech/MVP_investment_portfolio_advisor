@@ -21,6 +21,10 @@ openai.api_key = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
 end_date = datetime.now()
 start_date = end_date - timedelta(days=5*365)
 
+# Añadir imagen
+image_url = "https://www.inabaweb.com/wp-content/uploads/2023/06/eToro.png"
+st.image(image_url, caption="Imagen de la URL", use_column_width=True)
+
 # Descargar datos
 @st.cache_data
 def cargar_datos():
