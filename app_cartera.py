@@ -22,7 +22,7 @@ end_date = datetime.now()
 start_date = end_date - timedelta(days=5*365)
 
 # Añadir imagen
-image_url = "https://github.com/Damvtech/Recomendador_cartera_inversion_basico/blob/main/media/Fondo_app.png"
+image_url = "https://github.com/Damvtech/Recomendador_cartera_inversion_basico/blob/main/media/Fondo_app.png?raw=true"
 st.markdown(
     f"""
     <style>
