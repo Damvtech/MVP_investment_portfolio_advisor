@@ -21,8 +21,25 @@ openai.api_key = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
 end_date = datetime.now()
 start_date = end_date - timedelta(days=5*365)
 
+# Barra header en negro
+st.markdown("""
+    <style>
+    /* Cambiar color de la barra superior */
+    header[data-testid="stHeader"] {
+        background-color: black;
+    }
+
+    /* Opcional: eliminar el borde inferior blanco */
+    header[data-testid="stHeader"]::before {
+        content: "";
+        display: block;
+        height: 0px;
+    }
+    </style>
+""", unsafe_allow_html=True)
 # Añadir imagen
 image_url = "https://github.com/Damvtech/Recomendador_cartera_inversion_basico/blob/main/media/Fondo_app.png?raw=true"
+# Establecer el fondo de la aplicación
 st.markdown(
     f"""
     <style>
