@@ -51,7 +51,7 @@ st.markdown(
     }}
 
     [data-testid="stVerticalBlock"] {{
-        background-color: rgba(255, 255, 255, 0.85);
+        background-color: rgba(255, 255, 255, 0.65);  /* antes 0.85 */
         padding: 2rem;
         border-radius: 10px;
     }}
