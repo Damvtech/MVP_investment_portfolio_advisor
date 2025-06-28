@@ -50,10 +50,16 @@ st.markdown(
         background-repeat: no-repeat;
     }}
 
+    /* Eliminar fondo de widgets */
     [data-testid="stVerticalBlock"] {{
-        background-color: rgba(255, 255, 255, 0.65);  /* antes 0.85 */
+        background-color: rgba(0, 0, 0, 0);  /* Fondo completamente transparente */
         padding: 2rem;
-        border-radius: 10px;
+    }}
+
+    /* Texto en blanco con sombra para mejor contraste */
+    [data-testid="stAppViewContainer"] * {{
+        color: white !important;
+        text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.7);
     }}
     </style>
     """,
