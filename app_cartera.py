@@ -44,10 +44,18 @@ st.markdown(
         color: white !important;
         text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.7);
     }}
-    /* Letras del botón en rosa */
-        button[data-testid="baseButton-primary"] {{
-        color: #b024a1;
-        font-weight: bold;
+
+    /* Botón primario: letras en rosa */
+    button[kind="primary"] > div[data-testid="stMarkdownContainer"] p {{
+        color: #b024a1 !important;
+        font-weight: bold !important;
+        text-shadow: none !important;
+    }}
+
+    /* Alternativa de refuerzo si el botón no se renderiza como markdown */
+    button[kind="primary"] {{
+        color: #b024a1 !important;
+        font-weight: bold !important;
     }}
 
     /* Hacer transparente la barra del header */
@@ -58,6 +66,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 # Descargar datos
 @st.cache_data
