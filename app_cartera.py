@@ -21,28 +21,12 @@ openai.api_key = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
 end_date = datetime.now()
 start_date = end_date - timedelta(days=5*365)
 
-# Barra header en negro
-st.markdown("""
-    <style>
-    /* Cambiar color de la barra superior */
-    header[data-testid="stHeader"] {
-        background-color: black;
-    }
-
-    /* Opcional: eliminar el borde inferior blanco */
-    header[data-testid="stHeader"]::before {
-        content: "";
-        display: block;
-        height: 0px;
-    }
-    </style>
-""", unsafe_allow_html=True)
 # Añadir imagen
 image_url = "https://github.com/Damvtech/Recomendador_cartera_inversion_basico/blob/main/media/Fondo_app.png?raw=true"
 # Establecer el fondo de la aplicación
-st.markdown(
-    f"""
+st.markdown(f"""
     <style>
+    /* Fondo general */
     html, body, [data-testid="stAppViewContainer"] {{
         background-image: url("{image_url}");
         background-size: cover;
@@ -60,14 +44,41 @@ st.markdown(
         text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.7);
     }}
 
-    /* Hacer transparente la barra del header */
+    /* Botón activo */
+    button[kind="primary"] {{
+        color: #b024a1 !important;
+        font-weight: bold;
+        background-color: white !important;
+        border: 1px solid #b024a1 !important;
+        box-shadow: 0px 0px 8px rgba(176, 36, 161, 0.4);
+    }}
+
+    /* Hover */
+    button[kind="primary"]:hover {{
+        background-color: #f8e6f4 !important;
+        color: #b024a1 !important;
+    }}
+
+    /* Clicado */
+    button[kind="primary"]:active {{
+        background-color: #eed3ea !important;
+        color: #b024a1 !important;
+    }}
+
+    /* Deshabilitado */
+    button[kind="primary"]:disabled {{
+        color: #b024a1 !important;
+        opacity: 0.5 !important;
+        background-color: white !important;
+    }}
+
+    /* Barra superior transparente */
     header[data-testid="stHeader"] {{
         background-color: rgba(0, 0, 0, 0);
     }}
     </style>
-    """,
-    unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
+
 
 # Descargar datos
 @st.cache_data
