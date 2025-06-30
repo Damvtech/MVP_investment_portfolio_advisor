@@ -33,11 +33,9 @@ st.markdown(
     }}
 
     [data-testid="stVerticalBlock"] {{
-        background-color: rgba(0, 0, 0, 0.4);
+        background-color: rgba(0, 0, 0, 0.3);  /* fondo negro con 30% de opacidad */
         padding: 2rem;
         border-radius: 12px;
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
     }}
 
     [data-testid="stAppViewContainer"] * {{
