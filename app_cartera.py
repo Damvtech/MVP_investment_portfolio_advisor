@@ -21,7 +21,22 @@ openai.api_key = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
 end_date = datetime.now()
 start_date = end_date - timedelta(days=5*365)
 
+# Barra header en negro
+st.markdown("""
+    <style>
+    /* Cambiar color de la barra superior */
+    header[data-testid="stHeader"] {
+        background-color: black;
+    }
 
+    /* Opcional: eliminar el borde inferior blanco */
+    header[data-testid="stHeader"]::before {
+        content: "";
+        display: block;
+        height: 0px;
+    }
+    </style>
+""", unsafe_allow_html=True)
 # Añadir imagen
 image_url = "https://github.com/Damvtech/Recomendador_cartera_inversion_basico/blob/main/media/Fondo_app.png?raw=true"
 # Establecer el fondo de la aplicación
@@ -45,37 +60,6 @@ st.markdown(
         text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.7);
     }}
 
-    /* General button style (enabled state) */
-    button[data-testid="baseButton-primary"]:enabled {
-        color: #b024a1 !important;
-        font-weight: bold !important;
-        background-color: white !important;
-        border: 1px solid #b024a1 !important;
-        box-shadow: 0px 0px 8px rgba(176, 36, 161, 0.4);
-    }
-
-    /* Hover state */
-    button[data-testid="baseButton-primary"]:enabled:hover {
-        background-color: #f8e6f4 !important;
-        color: #b024a1 !important;
-        border: 1px solid #b024a1 !important;
-    }
-
-    /* Click (active) state */
-    button[data-testid="baseButton-primary"]:enabled:active {
-        background-color: #eed3ea !important;
-        color: #b024a1 !important;
-        border: 1px solid #b024a1 !important;
-    }
-
-    /* Disabled state */
-    button[data-testid="baseButton-primary"]:disabled {
-        color: #b024a1 !important;
-        opacity: 0.6 !important;
-        background-color: white !important;
-        border: 1px solid #b024a1 !important;
-    }
-
     /* Hacer transparente la barra del header */
     header[data-testid="stHeader"] {{
         background-color: rgba(0, 0, 0, 0);
@@ -84,7 +68,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 
 # Descargar datos
 @st.cache_data
@@ -134,7 +117,7 @@ st.title("📊 Recomendador de Cartera de Inversión")
 st.write("Responde estas preguntas para determinar la cartera más adecuada a tu apetito de riesgo actual:")
 st.write("**Esta simulación se basa en datos históricos y no garantiza rentabilidades futuras. Invierte con responsabilidad.*") # Disclaimer
 
-# 5 preguntas para determinar el apetito de riesgo
+# Widget con clave única
 q1 = st.radio("¿Cuál es tu nivel de experiencia en finanzas?", [
     "Casi nada o nada",
     "Conozco los conceptos básicos",
@@ -174,7 +157,6 @@ q5 = st.radio("¿Durante cuánto tiempo piensas mantener esta inversión?", [
     "5 a 10 años",
     "Más de 10 años"
 ], index=None, key='q5')
-
 
 # Botón para generar cartera (para evitar auto-ejecución)
 if st.button("Generar cartera óptima"):
@@ -374,3 +356,4 @@ if st.button("Generar cartera óptima"):
                 st.success(mensaje)
             except Exception as e:
                 st.error(f"Ocurrió un error al generar el mensaje: {e}")
+
