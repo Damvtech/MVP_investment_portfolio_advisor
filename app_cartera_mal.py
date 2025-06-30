@@ -13,16 +13,18 @@ from openai import OpenAI
 #load_dotenv()
 openai.api_key = st.secrets.get("OPENAI_API_KEY", os.getenv("OPENAI_API_KEY"))
 
+#import cmdstanpy
+#cmdstanpy.install_cmdstan()
+
+
 # Definir las fechas globalmente
 end_date = datetime.now()
 start_date = end_date - timedelta(days=5*365)
 
-# Añadir imagen y estilos CSS
+# Añadir imagen
 image_url = "https://github.com/Damvtech/Recomendador_cartera_inversion_basico/blob/main/media/Fondo_app.png?raw=true"
-
-# Establecer el fondo de la aplicación con estilos corregidos para el botón
-st.markdown(
-    f"""
+# Establecer el fondo de la aplicación
+st.markdown(f"""
     <style>
     /* Fondo general */
     html, body, [data-testid="stAppViewContainer"] {{
@@ -42,55 +44,41 @@ st.markdown(
         text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.7);
     }}
 
-    /* Estilos para botones de Streamlit */
-    .stButton > button {{
+    /* Botón activo */
+    button[kind="primary"] {{
         color: #b024a1 !important;
-        font-weight: bold !important;
+        font-weight: bold;
         background-color: white !important;
-        border: 2px solid #b024a1 !important;
-        box-shadow: 0px 0px 8px rgba(176, 36, 161, 0.4) !important;
-        border-radius: 6px !important;
-        padding: 0.5rem 1rem !important;
-        transition: all 0.3s ease !important;
+        border: 1px solid #b024a1 !important;
+        box-shadow: 0px 0px 8px rgba(176, 36, 161, 0.4);
     }}
 
-    /* Hover del botón */
-    .stButton > button:hover {{
+    /* Hover */
+    button[kind="primary"]:hover {{
         background-color: #f8e6f4 !important;
         color: #b024a1 !important;
-        border-color: #b024a1 !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0px 4px 12px rgba(176, 36, 161, 0.6) !important;
     }}
 
-    /* Botón presionado */
-    .stButton > button:active {{
+    /* Clicado */
+    button[kind="primary"]:active {{
         background-color: #eed3ea !important;
         color: #b024a1 !important;
-        transform: translateY(0px) !important;
-        box-shadow: 0px 2px 6px rgba(176, 36, 161, 0.4) !important;
     }}
 
-    /* Botón con foco */
-    .stButton > button:focus {{
-        border-color: #b024a1 !important;
-        box-shadow: 0px 0px 0px 3px rgba(176, 36, 161, 0.2) !important;
-    }}
-
-    /* Hacer transparente la barra del header */
-    header[data-testid="stHeader"] {{
-        background-color: rgba(0, 0, 0, 0) !important;
-    }}
-
-    /* Asegurar que el texto del botón siempre sea rosa */
-    .stButton > button p {{
+    /* Deshabilitado */
+    button[kind="primary"]:disabled {{
         color: #b024a1 !important;
-        font-weight: bold !important;
+        opacity: 0.5 !important;
+        background-color: white !important;
+    }}
+
+    /* Barra superior transparente */
+    header[data-testid="stHeader"] {{
+        background-color: rgba(0, 0, 0, 0);
     }}
     </style>
-    """,
-    unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
+
 
 # Descargar datos
 @st.cache_data
@@ -117,6 +105,7 @@ def cargar_datos():
     "General Electric": "GE", "Honeywell": "HON", "3M": "MMM", "Caterpillar": "CAT", "Deere & Company": "DE",
     "Starbucks": "SBUX", "Nike": "NKE", "Lululemon": "LULU", "Estee Lauder": "EL", "Domino's Pizza": "DPZ",
     "Booking Holdings": "BKNG", "American Express": "AXP", "Mastercard": "MA", "PayPal": "PYPL"
+        # Puedes agregar más compañías aquí para tu MVP
     }
     data = pd.DataFrame()
     for company, symbol in symbols.items():
@@ -137,7 +126,7 @@ cov_matrix = daily_returns.cov()
 # Preguntas
 st.title("📊 Recomendador de Cartera de Inversión")
 st.write("Responde estas preguntas para determinar la cartera más adecuada a tu apetito de riesgo actual:")
-st.write("**Esta simulación se basa en datos históricos y no garantiza rentabilidades futuras. Invierte con responsabilidad.*")
+st.write("**Esta simulación se basa en datos históricos y no garantiza rentabilidades futuras. Invierte con responsabilidad.*") # Disclaimer
 
 # Widget con clave única
 q1 = st.radio("¿Cuál es tu nivel de experiencia en finanzas?", [
@@ -189,13 +178,11 @@ if st.button("Generar cartera óptima"):
     else:
         # Calcular puntuación
         preguntas = [q1, q2, q3, q4, q5]
-        puntuaciones = [ 
-            ["Casi nada o nada", "Conozco los conceptos básicos", "Me considero bastante experto", "Es mi profesión y conozco todos los conceptos", "Trabajo en inversión y gestiono carteras a diario"].index(q1)+1,
-            ["No quiero ver pérdidas en ningún caso", "Acepto pequeñas pérdidas si son temporales", "Tolero pérdidas moderadas en el corto plazo", "Estoy dispuesto a asumir pérdidas altas si hay posibilidad de mayor rentabilidad", "Las pérdidas no me preocupan si la estrategia tiene sentido a largo plazo"].index(q2)+1,
-            ["Conservar mi dinero sin riesgo", "Un crecimiento pequeño pero estable", "Una rentabilidad razonable con cierto riesgo", "Altas rentabilidades asumiendo riesgos", "Maximizar beneficios aunque implique fuertes oscilaciones"].index(q3)+1,
-            ["Solo cuentas corrientes o de ahorro", "Depósitos bancarios o fondos de pensiones", "Fondos de inversión tradicionales", "Acciones o ETFs por cuenta propia", "Instrumentos complejos o derivados"].index(q4)+1,
-            ["Menos de 1 año", "1 a 3 años", "3 a 5 años", "5 a 10 años", "Más de 10 años"].index(q5)+1 
-        ]
+        puntuaciones = [ ["Máxima seguridad", "Alta seguridad", "Equilibrado", "Alta rentabilidad", "Máxima rentabilidad"].index(q1)+1,
+                         ["Muy conservadora", "Conservadora", "Equilibrada", "Agresiva", "Muy agresiva"].index(q2)+1,
+                         ["Muy baja", "Moderada-baja", "Media", "Alta", "Muy alta"].index(q3)+1,
+                         ["0%", "Hasta 5%", "Hasta 10%", "Hasta 20%", "Más de 20%"].index(q4)+1,
+                         ["< 1 año", "1-3 años", "3-5 años", "5-10 años", ">10 años"].index(q5)+1 ]
         
         total = sum(puntuaciones)
 
@@ -249,9 +236,6 @@ if st.button("Generar cartera óptima"):
         st.subheader("🎯 Composición óptima de tu cartera (ordenada de mayor a menor)")
         for empresa, peso in cartera_ordenada.items():
             st.write(f"- **{empresa}:** {peso}%")
-
-        # Resto del código continúa igual...
-        # (He mantenido solo la parte relevante para mostrar el cambio en los estilos CSS)
 
         # Convertir divisa a EUR si es necesario
 
