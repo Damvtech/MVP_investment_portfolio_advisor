@@ -45,18 +45,36 @@ st.markdown(
         text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.7);
     }}
 
-    /* Botón primario: letras en rosa */
-    button[kind="primary"] > div[data-testid="stMarkdownContainer"] p {{
+    /* General button style (enabled state) */
+    button[data-testid="baseButton-primary"]:enabled {
         color: #b024a1 !important;
         font-weight: bold !important;
-        text-shadow: none !important;
-    }}
+        background-color: white !important;
+        border: 1px solid #b024a1 !important;
+        box-shadow: 0px 0px 8px rgba(176, 36, 161, 0.4);
+    }
 
-    /* Alternativa de refuerzo si el botón no se renderiza como markdown */
-    button[kind="primary"] {{
+    /* Hover state */
+    button[data-testid="baseButton-primary"]:enabled:hover {
+        background-color: #f8e6f4 !important;
         color: #b024a1 !important;
-        font-weight: bold !important;
-    }}
+        border: 1px solid #b024a1 !important;
+    }
+
+    /* Click (active) state */
+    button[data-testid="baseButton-primary"]:enabled:active {
+        background-color: #eed3ea !important;
+        color: #b024a1 !important;
+        border: 1px solid #b024a1 !important;
+    }
+
+    /* Disabled state */
+    button[data-testid="baseButton-primary"]:disabled {
+        color: #b024a1 !important;
+        opacity: 0.6 !important;
+        background-color: white !important;
+        border: 1px solid #b024a1 !important;
+    }
 
     /* Hacer transparente la barra del header */
     header[data-testid="stHeader"] {{
@@ -117,25 +135,46 @@ st.write("Responde estas preguntas para determinar la cartera más adecuada a tu
 st.write("**Esta simulación se basa en datos históricos y no garantiza rentabilidades futuras. Invierte con responsabilidad.*") # Disclaimer
 
 # Widget con clave única
-q1 = st.radio("Nivel de seguridad deseado:",
-              ["Máxima seguridad", "Alta seguridad", "Equilibrado", "Alta rentabilidad", "Máxima rentabilidad"],
-              index=None, key='q1')
+q1 = st.radio("¿Cuál es tu nivel de experiencia en finanzas?", [
+    "Casi nada o nada",
+    "Conozco los conceptos básicos",
+    "Me considero bastante experto",
+    "Es mi profesión y conozco todos los conceptos",
+    "Trabajo en inversión y gestiono carteras a diario"
+], index=None, key='q1')
 
-q2 = st.radio("Diversificación deseada:",
-              ["Muy conservadora", "Conservadora", "Equilibrada", "Agresiva", "Muy agresiva"],
-              index=None, key='q2')
+q2 = st.radio("¿Cómo reaccionas ante posibles pérdidas en tu inversión?", [
+    "No quiero ver pérdidas en ningún caso",
+    "Acepto pequeñas pérdidas si son temporales",
+    "Tolero pérdidas moderadas en el corto plazo",
+    "Estoy dispuesto a asumir pérdidas altas si hay posibilidad de mayor rentabilidad",
+    "Las pérdidas no me preocupan si la estrategia tiene sentido a largo plazo"
+], index=None, key='q2')
 
-q3 = st.radio("Expectativa de rentabilidad:",
-              ["Muy baja", "Moderada-baja", "Media", "Alta", "Muy alta"],
-              index=None, key='q3')
+q3 = st.radio("¿Qué esperas obtener con tu inversión?", [
+    "Conservar mi dinero sin riesgo",
+    "Un crecimiento pequeño pero estable",
+    "Una rentabilidad razonable con cierto riesgo",
+    "Altas rentabilidades asumiendo riesgos",
+    "Maximizar beneficios aunque implique fuertes oscilaciones"
+], index=None, key='q3')
 
-q4 = st.radio("Nivel máximo de pérdida aceptable:",
-              ["0%", "Hasta 5%", "Hasta 10%", "Hasta 20%", "Más de 20%"],
-              index=None, key='q4')
+q4 = st.radio("¿Qué productos financieros has utilizado anteriormente?", [
+    "Solo cuentas corrientes o de ahorro",
+    "Depósitos bancarios o fondos de pensiones",
+    "Fondos de inversión tradicionales",
+    "Acciones o ETFs por cuenta propia",
+    "Instrumentos complejos o derivados"
+], index=None, key='q4')
 
-q5 = st.radio("Horizonte temporal de la inversión:",
-              ["< 1 año", "1-3 años", "3-5 años", "5-10 años", ">10 años"],
-              index=None, key='q5')
+q5 = st.radio("¿Durante cuánto tiempo piensas mantener esta inversión?", [
+    "Menos de 1 año",
+    "1 a 3 años",
+    "3 a 5 años",
+    "5 a 10 años",
+    "Más de 10 años"
+], index=None, key='q5')
+
 
 # Botón para generar cartera (para evitar auto-ejecución)
 if st.button("Generar cartera óptima"):
