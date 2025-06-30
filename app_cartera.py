@@ -134,7 +134,7 @@ st.title("📊 Recomendador de Cartera de Inversión")
 st.write("Responde estas preguntas para determinar la cartera más adecuada a tu apetito de riesgo actual:")
 st.write("**Esta simulación se basa en datos históricos y no garantiza rentabilidades futuras. Invierte con responsabilidad.*") # Disclaimer
 
-# Widget con clave única
+# 5 preguntas para determinar el apetito de riesgo
 q1 = st.radio("¿Cuál es tu nivel de experiencia en finanzas?", [
     "Casi nada o nada",
     "Conozco los conceptos básicos",
@@ -374,5 +374,3 @@ if st.button("Generar cartera óptima"):
                 st.success(mensaje)
             except Exception as e:
                 st.error(f"Ocurrió un error al generar el mensaje: {e}")
-
-
