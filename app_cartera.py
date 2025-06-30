@@ -33,7 +33,7 @@ st.markdown(
     }}
 
     [data-testid="stVerticalBlock"] {{
-        background-color: rgba(0, 0, 0, 0.4);  /* fondo negro con 40% de opacidad */
+        background-color: rgba(0, 0, 0, 0.5);  /* fondo negro con 50% de opacidad */
         padding: 2rem;
         border-radius: 12px;
     }}
